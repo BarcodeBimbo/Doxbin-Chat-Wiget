@@ -1,4 +1,3 @@
-// static/js/widget.js
 document.addEventListener('DOMContentLoaded', function() {
     const chatDisplay = document.getElementById('chat-display');
     const onlineCounter = document.getElementById('online-counter');
