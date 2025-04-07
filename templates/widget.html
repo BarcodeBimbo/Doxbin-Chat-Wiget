@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doxbin Chat Widget</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/widget.css') }}">
+</head>
+<body>
+    <div class="chat-widget" id="chat-widget">
+        <div class="title-bar">
+            <img src="https://tlo.sh/imgs/tlo-t.png" alt="Logo" class="logo">
+            <span class="title">Doxbin Chat Snooper</span>
+            <div class="online-count">
+                <div class="online-dot"></div>
+                <span id="online-counter">0</span>
+            </div>
+            <button id="minimize-btn" class="minimize-btn">_</button>
+        </div>
+        <div class="chat-display" id="chat-display"></div>
+    </div>
+    
+    <!-- Minimized state button -->
+    <div class="chat-widget-minimized" id="chat-widget-minimized">
+        <div class="minimized-content">
+            <img src="https://tlo.sh/imgs/tlo-t.png" alt="Logo" class="logo-small">
+            <span>Doxbin Chat</span>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/widget.js') }}"></script>
+</body>
+</html>
