@@ -1,32 +1,19 @@
-# app.py
 from flask import Flask, render_template, jsonify
-import socketio
-import json
-import datetime
-import threading
-import asyncio
-import uuid
-import waitress
-import random
-import string
-import re
-import requests
+import socketio, json, datetime, threading, asyncio, uuid, waitress, re, requests
 
-app = Flask(__name__)
+snoop = Flask(__name__)
 sio = socketio.AsyncClient()
 message_history = []
 online_count = "0"
 unread_count = 0
 
 def strip_html_tags(text):
-    """Remove HTML tags from a string."""
     if not text:
         return text
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
 def current_utc_time():
-    """Return the current UTC time in HH:MM UTC format."""
     return datetime.datetime.now(datetime.timezone.utc).strftime("%H:%M UTC")
 
 async def socket_client():
@@ -43,7 +30,7 @@ async def socket_client():
         "Connection": "keep-alive, Upgrade",
         "Cookie": cookies
     }
-    
+
     try:
         await sio.connect("https://doxbin.net", transports=["websocket"], headers=headers, socketio_path="/gateway/")
         system_message = {
@@ -78,7 +65,6 @@ def load_cookies_from_json(json_path="cookies.json"):
         print(f"Invalid JSON in {json_path}")
         return ""
 
-# Socket.io event handlers
 @sio.event
 async def connect():
     system_message = {
@@ -114,26 +100,25 @@ async def on_online(data):
     global online_count
     online_count = str(data)
 
-# Flask routes
-@app.route('/')
+@snoop.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/widget')
+@snoop.route('/widget')
 def widget():
     return render_template('widget.html')
 
-@app.route('/messages')
+@snoop.route('/messages')
 def get_messages():
     global unread_count
     unread_count = 0
     return jsonify(message_history)
 
-@app.route('/online')
+@snoop.route('/online')
 def get_online():
     return jsonify({"count": online_count})
 
-@app.route('/unread')
+@snoop.route('/unread')
 def get_unread():
     return jsonify({"count": unread_count})
 
@@ -144,4 +129,4 @@ def start_background_tasks():
 
 if __name__ == '__main__':
     threading.Thread(target=start_background_tasks, daemon=True).start()
-    waitress.serve(app, host='0.0.0.0', port=5000)
+    waitress.serve(snoop, host='0.0.0.0', port=5000)
