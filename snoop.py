@@ -144,4 +144,4 @@ def start_background_tasks():
 
 if __name__ == '__main__':
     threading.Thread(target=start_background_tasks, daemon=True).start()
-    waitress.serve(app, host='0.0.0.0', port=8934)
+    waitress.serve(app, host='0.0.0.0', port=5000)
