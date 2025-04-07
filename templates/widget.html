@@ -20,11 +20,27 @@
         <div class="chat-display" id="chat-display"></div>
     </div>
     
+    <!-- Minimized state button -->
     <div class="chat-widget-minimized" id="chat-widget-minimized">
         <div class="minimized-content">
             <img src="https://tlo.sh/imgs/tlo-t.png" alt="Logo" class="logo-small">
             <span>Doxbin Chat</span>
         </div>
+    </div>
+
+    <!-- Right-click context menu -->
+    <div id="context-menu" class="context-menu">
+        <div id="clear-chat" class="context-menu-item">Refresh</div>
+    </div>
+  
+    <!-- Popout message info -->
+    <div id="message-popout" class="message-popout">
+      <div class="popout-content">
+        <div id="popout-header"></div>
+        <div id="popout-message" class="popout-message"></div>
+        <button id="view-profile-btn" class="popout-button">View Profile</button>
+        <button id="copy-id-btn" class="popout-button">Copy Message ID</button>
+      </div>
     </div>
     
     <script src="{{ url_for('static', filename='js/widget.js') }}"></script>
