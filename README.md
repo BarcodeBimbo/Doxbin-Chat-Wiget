@@ -120,7 +120,7 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 - **Name:** Joshua 
 - **Contact:** @BarcodeBimbo
 - **Version:** 1.0.0
-- **Updated:** April 04, 2025
+- **Updated:** April 07, 2025
 
 ## ⚠️ Disclaimer
 
