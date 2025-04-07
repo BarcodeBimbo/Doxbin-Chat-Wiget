@@ -25,6 +25,13 @@ This is a Flask-based web widget version of the Doxbin Chat Snooper. It allows y
 - **Styling**: Maintains the dark theme and styling of the original application
 - **Notification**: Visual notification when new messages arrive while minimized
 
+---
+
+### Preview:
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/35953510-e767-427b-a41d-23db85ec1a4c.mp4"></video>
+</div>
+
 ## Requirements
 
 - Python 3.6+
@@ -72,14 +79,14 @@ This is a Flask-based web widget version of the Doxbin Chat Snooper. It allows y
    python snoop.py
    ```
 
-2. Visit `http://localhost:8934` in your browser to see the widget demo.
+2. Visit `http://localhost:5000` in your browser to see the widget demo.
 
 ## Embedding in Your Static Site
 
 To embed the chat widget in your static HTML site, add the following iframe:
 
 ```html
-<iframe src="http://your-server-address:8934/widget" width="100%" height="100%" frameborder="0" style="border:none;position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:999;pointer-events:none;"></iframe>
+<iframe src="http://your-server-address:5000/widget" width="100%" height="100%" frameborder="0" style="border:none;position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:999;pointer-events:none;"></iframe>
 ```
 
 Replace `your-server-address` with the IP address or domain name of your Flask server.
