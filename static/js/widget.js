@@ -66,13 +66,46 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error fetching online count:', error));
     }
 
+    function linkify(text) {
+        const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+        return text.replace(urlPattern, function(url) {
+            return `<a href="${url}" target="_blank" style="color: #66ccff; text-decoration: underline;">${url}</a>`;
+        });
+    }
+
     function displayMessage(data) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message';
+
+        let usernameColor = '#0099FF';
+        let suffix = '';
+        let suffixColor = '';
+        let rankStyle = '';
+
+        if (data.usernameColor) {
+            usernameColor = data.usernameColor;
+        }
+        if (data.rankData && data.rankData.rankColor) {
+            suffixColor = data.rankData.rankColor;
+        }
+        if (data.rankData && data.rankData.suffix) {
+            suffix = data.rankData.suffix;
+        }
+        if (data.rankData && data.rankData.style) {
+            rankStyle = data.rankData.style;
+        }
+
+        const isSystemMessage = data.displayName === 'Doxbin' && suffix === '[System]';
+        if (isSystemMessage) {
+            usernameColor = 'red';
+            suffixColor = 'red';
+            rankStyle = 'font-weight: bold;';
+        }
+
         messageDiv.dataset.createdAt = data.createdAt;
         messageDiv.dataset.displayName = data.displayName;
-        messageDiv.dataset.usernameColor = data.usernameColor || (data.rankData && data.rankData.rankColor) || '#0099FF';
-        messageDiv.dataset.suffix = (data.rankData && data.rankData.suffix) || '';
+        messageDiv.dataset.usernameColor = usernameColor;
+        messageDiv.dataset.suffix = suffix;
         messageDiv.dataset.content = data.content;
         messageDiv.dataset.messageId = data.messageID || '';
 
@@ -83,14 +116,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const usernameSpan = document.createElement('span');
         usernameSpan.className = 'username';
-        usernameSpan.style.color = messageDiv.dataset.usernameColor;
+        usernameSpan.style.color = usernameColor;
+        if (rankStyle) usernameSpan.style.cssText += rankStyle;
         usernameSpan.textContent = data.displayName;
         messageDiv.appendChild(usernameSpan);
 
-        if (data.rankData && data.rankData.suffix) {
+        if (suffix) {
             const suffixSpan = document.createElement('span');
             suffixSpan.className = 'suffix';
-            suffixSpan.textContent = data.rankData.suffix;
+            suffixSpan.style.color = suffixColor;
+            if (rankStyle) suffixSpan.style.cssText += rankStyle;
+            suffixSpan.textContent = suffix;
             messageDiv.appendChild(suffixSpan);
         }
 
@@ -100,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const contentSpan = document.createElement('span');
         contentSpan.className = 'content';
-        contentSpan.textContent = data.content;
+        contentSpan.innerHTML = linkify(data.content);
         messageDiv.appendChild(contentSpan);
 
         chatDisplay.appendChild(messageDiv);

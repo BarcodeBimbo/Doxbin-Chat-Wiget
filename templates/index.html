@@ -1,98 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doxbin Chat Snooper</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-      body {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        background-color: #121212;
-        color: #e0e0e0;
-        margin: 0;
-        padding: 20px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doxbin Chat Snooper</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background-color: #1e1e1e;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-      }
+  
+  <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 
-      h1 {
-        color: #ffffff;
-      }
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+    }
 
-      pre {
-        background-color: #2c2c2c;
-        padding: 15px;
-        border-radius: 5px;
-        overflow-x: auto;
-      }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
 
-      .instructions {
-        margin-top: 20px;
-        background-color: #252525;
-        padding: 15px;
-        border-left: 4px solid #1e90ff;
-        border-radius: 4px;
-      }
+    h1 {
+      color: #ffffff;
+    }
 
-      .instructions h2 {
-        margin-top: 0;
-        color: #1e90ff;
-      }
+    .instructions {
+      margin-top: 20px;
+      background-color: #252525;
+      padding: 15px;
+      border-left: 4px solid #1e90ff;
+      border-radius: 4px;
+    }
 
-      .instructions h3 {
-        color: #1e90ff;
-      }
+    .instructions h2 {
+      margin-top: 0;
+      color: #1e90ff;
+    }
 
-      .code-snippet {
-        font-family: monospace;
-        background-color: #2c2c2c;
-        padding: 10px;
-        border-radius: 4px;
-        border: 1px solid #333;
-        white-space: pre-wrap;
-        margin: 10px 0;
-        color: #e0e0e0;
-      }
+    .instructions h3 {
+      color: #1e90ff;
+    }
 
-      ul li {
-        color: #cfcfcf;
-      }
+    .code-snippet {
+      position: relative;
+      margin: 10px 0;
+    }
 
-      code {
-        background-color: #333;
-        padding: 2px 4px;
-        border-radius: 4px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Doxbin Chat Snooper Widget</h1>
-      <p>This page demonstrates the Doxbin Chat Snooper widget that can be embedded on any static HTML site.</p>
-      <div class="instructions">
-        <h2>How to Embed the Widget</h2>
-        <p>To embed this widget on your static site, add the following iframe to your HTML:</p>
-        <div class="code-snippet"> &lt;iframe src="http://127.0.0.1:5000/widget" width="100%" height="100%" frameborder="0" style="border:none;position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:999;"&gt;&lt;/iframe&gt; </div>
-        <p>The widget will appear in the bottom left corner of your website with a minimize/maximize button.</p>
-        <h3>Important Notes:</h3>
-        <ul>
-          <li>
-            <strong>Do NOT use</strong>
-            <code>pointer-events:none</code> if you want users to interact with the chat widget.
-          </li>
-          <li>The widget position is fixed at the bottom left corner of the window.</li>
-          <li>The widget state (minimized/maximized) is saved automatically.</li>
-        </ul>
+    pre {
+      background-color: #2c2c2c;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    ul li {
+      color: #cfcfcf;
+    }
+
+    /* Custom context menu */
+    #custom-context-menu {
+      display: none;
+      position: absolute;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      width: 150px;
+      cursor: pointer;
+    }
+
+    #custom-context-menu:hover {
+      background-color: #2c2c2c;
+    }
+
+    #custom-context-menu img {
+      width: 16px;
+      vertical-align: middle;
+      margin-right: 8px;
+      filter: invert(1);
+    }
+
+    /* Toast notification */
+    #toast {
+      visibility: hidden;
+      min-width: 120px;
+      margin-left: -60px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 4px;
+      padding: 10px;
+      position: fixed;
+      z-index: 9999;
+      left: 50%;
+      bottom: 30px;
+      font-size: 14px;
+      transition: visibility 0s, opacity 0.5s linear;
+      opacity: 0;
+    }
+
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Doxbin Chat Snooper Widget</h1>
+    <p>This page demonstrates the Doxbin Chat Snooper widget that can be embedded on any static HTML site.</p>
+
+    <div class="instructions">
+      <h2>How to Embed the Widget</h2>
+      <p>To embed this widget on your static site, add the following iframe to your HTML:</p>
+
+      
+      <div class="code-snippet">
+        <pre><code class="language-html">
+&lt;iframe src="http://127.0.0.1:5000/widget"
+    width="400px"
+    height="600px"
+    frameborder="0"
+    style="border:none;position:fixed;bottom:20px;left:20px;z-index:999;border-radius:12px;overflow:hidden;"&gt;
+&lt;/iframe&gt;
+        </code></pre>
       </div>
+
+      <p>The widget will appear in the bottom left corner of your website with a fixed position.</p>
+
+      <h2>Full Example Page</h2>
+      <p>Here’s a full working example that includes everything in a basic HTML page:</p>
+
+      
+      <div class="code-snippet">
+        <pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Doxbin Chat Widget Example&lt;/title&gt;
+  &lt;style&gt;
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      color: #ffffff;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="container"&gt;
+    &lt;h1&gt;Doxbin Chat Snooper Widget&lt;/h1&gt;
+    &lt;p&gt;Quick example on how to create an iframe in HTML&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;iframe src="http://127.0.0.1:5000/widget"
+    width="400px"
+    height="600px"
+    frameborder="0"
+    style="border:none;position:fixed;bottom:20px;left:20px;z-index:999;border-radius:12px;overflow:hidden;"&gt;
+  &lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+      </div>
+
+      <h3>Important Notes:</h3>
+      <ul>
+        <li><strong>Do NOT use</strong> <code>pointer-events:none</code> if you want users to interact with the chat widget.</li>
+        <li>The widget position is fixed at the bottom left corner of the window.</li>
+        <li>The widget is easy to embed into any existing website.</li>
+      </ul>
     </div>
-    <iframe src="/widget" style="border:none;position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:999;" frameborder="0"></iframe>
-  </body>
+  </div>
+
+  
+  <iframe src="http://127.0.0.1:5000/widget"
+    width="400px"
+    height="600px"
+    frameborder="0"
+    style="border:none;position:fixed;bottom:20px;left:20px;z-index:999;border-radius:12px;overflow:hidden;">
+  </iframe>
+
+  
+  <div id="custom-context-menu">
+    <img src="{{ url_for('static', filename='img/copy-icon.svg') }}" alt="Copy" />
+    <span>Copy Code</span>
+  </div>
+
+  
+  <div id="toast">Copied!</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+
+      const codeBlocks = document.querySelectorAll('code.language-html');
+      const customMenu = document.getElementById('custom-context-menu');
+      const toast = document.getElementById('toast');
+      let currentCodeBlock = null;
+
+      // Helper to decode HTML entities
+      function decodeHTMLEntities(text) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        return textarea.value;
+      }
+
+      // Show toast notification
+      function showToast(message) {
+        toast.innerText = message;
+        toast.className = 'show';
+        setTimeout(() => {
+          toast.className = toast.className.replace('show', '');
+        }, 2000);
+      }
+
+      codeBlocks.forEach(code => {
+        code.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          currentCodeBlock = code;
+          customMenu.style.top = `${e.pageY}px`;
+          customMenu.style.left = `${e.pageX}px`;
+          customMenu.style.display = 'block';
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#custom-context-menu')) {
+          if (currentCodeBlock) {
+            const rawCode = currentCodeBlock.innerText.trim();
+            const decodedCode = decodeHTMLEntities(rawCode);
+            navigator.clipboard.writeText(decodedCode).then(() => {
+              showToast('Copied!');
+            });
+          }
+        }
+        customMenu.style.display = 'none';
+      });
+
+      window.addEventListener('scroll', () => {
+        customMenu.style.display = 'none';
+      });
+
+      window.addEventListener('resize', () => {
+        customMenu.style.display = 'none';
+      });
+    });
+  </script>
+</body>
 </html>
